@@ -30,56 +30,54 @@
             position: relative;
             width: 400px;
             height: 400px;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
         }
         .wheel {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
         }
-        .wheel-segment {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: 100% 100%;
-            left: 0;
-            top: 0;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding-left: 60px;
-        }
-        .wheel-segment span {
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-            white-space: nowrap;
-            transform-origin: center;
+        .wheel svg {
+            width: 100%;
+            height: 100%;
         }
         .pointer {
             position: absolute;
-            top: -20px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        .pointer::before {
+            content: '';
+            position: absolute;
             width: 0;
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 40px solid #ff6b6b;
-            z-index: 10;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            border-top: 45px solid #ff4757;
         }
-        .center-circle {
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #ff4757;
+            border-radius: 50%;
+        }
+        .center-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
             border-radius: 50%;
             display: flex;
@@ -87,9 +85,22 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(238, 90, 90, 0.5), inset 0 -5px 10px rgba(0,0,0,0.1);
             z-index: 5;
+            border: 4px solid rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+        .center-btn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .center-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        .center-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
         .spin-btn {
             margin-top: 40px;
@@ -118,40 +129,53 @@
         }
         .result {
             margin-top: 30px;
-            padding: 20px 40px;
+            padding: 25px 50px;
             background: rgba(255,255,255,0.95);
-            border-radius: 15px;
+            border-radius: 20px;
             text-align: center;
-            min-width: 300px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-width: 320px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
+            transform: translateY(20px) scale(0.9);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .result.show {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
         .result h2 {
             color: #667eea;
             margin-bottom: 10px;
+            font-size: 1.5rem;
         }
         .result p {
             color: #333;
-            font-size: 1.2rem;
+            font-size: 1.8rem;
             font-weight: bold;
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         @media (max-width: 480px) {
             .wheel-container {
-                width: 320px;
-                height: 320px;
+                width: 340px;
+                height: 340px;
             }
             h1 {
                 font-size: 1.8rem;
             }
-            .wheel-segment span {
-                font-size: 13px;
-                padding-left: 40px;
+            .center-btn {
+                width: 75px;
+                height: 75px;
+                font-size: 15px;
             }
         }
     </style>
@@ -160,8 +184,12 @@
     <h1>🎰 幸运大转盘</h1>
     <div class="wheel-container">
         <div class="pointer"></div>
-        <div class="wheel" id="wheel"></div>
-        <div class="center-circle">GO</div>
+        <div class="wheel" id="wheel">
+            <svg viewBox="0 0 400 400">
+                <g id="wheel-svg" transform="translate(200,200)"></g>
+            </svg>
+        </div>
+        <button class="center-btn" id="centerBtn" onclick="spin()">GO</button>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spin()">开始抽奖</button>
     <div class="result" id="result">
@@ -182,47 +210,95 @@
         ];
 
         const wheel = document.getElementById('wheel');
+        const wheelSvg = document.getElementById('wheel-svg');
         const spinBtn = document.getElementById('spinBtn');
+        const centerBtn = document.getElementById('centerBtn');
         const result = document.getElementById('result');
         const resultText = document.getElementById('resultText');
         let currentRotation = 0;
         let isSpinning = false;
 
-        // 创建转盘扇形
+        // 创建 SVG 转盘
         function createWheel() {
             const segmentAngle = 360 / prizes.length;
+            const radius = 190;
             
             prizes.forEach((prize, index) => {
-                const segment = document.createElement('div');
-                segment.className = 'wheel-segment';
-                segment.style.background = prize.color;
+                const startAngle = index * segmentAngle;
+                const endAngle = (index + 1) * segmentAngle;
                 
-                const rotation = index * segmentAngle;
-                segment.style.transform = `rotate(${rotation}deg) skewY(${90 - segmentAngle}deg)`;
+                // 计算扇形路径
+                const startRad = (startAngle - 90) * Math.PI / 180;
+                const endRad = (endAngle - 90) * Math.PI / 180;
                 
-                const text = document.createElement('span');
+                const x1 = Math.cos(startRad) * radius;
+                const y1 = Math.sin(startRad) * radius;
+                const x2 = Math.cos(endRad) * radius;
+                const y2 = Math.sin(endRad) * radius;
+                
+                // 创建扇形
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = `M 0 0 L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+                path.setAttribute('d', d);
+                path.setAttribute('fill', prize.color);
+                path.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                path.setAttribute('stroke-width', '2');
+                wheelSvg.appendChild(path);
+                
+                // 创建文字
+                const textAngle = startAngle + segmentAngle / 2 - 90;
+                const textRad = textAngle * Math.PI / 180;
+                const textRadius = radius * 0.65;
+                const tx = Math.cos(textRad) * textRadius;
+                const ty = Math.sin(textRad) * textRadius;
+                
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', tx);
+                text.setAttribute('y', ty);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', '18');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('transform', `rotate(${textAngle + 90}, ${tx}, ${ty})`);
                 text.textContent = prize.name;
-                text.style.transform = `skewY(${segmentAngle - 90}deg) rotate(${segmentAngle / 2}deg)`;
-                segment.appendChild(text);
-                wheel.appendChild(segment);
+                wheelSvg.appendChild(text);
             });
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#f39c12', '#9b59b6', '#2ecc71'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
         }
 
         function spin() {
             if (isSpinning) return;
             isSpinning = true;
             spinBtn.disabled = true;
+            centerBtn.disabled = true;
             result.classList.remove('show');
 
             const winningIndex = Math.floor(Math.random() * prizes.length);
             const segmentAngle = 360 / prizes.length;
             
-            // 修正：让目标扇形中间对准顶部指针
-            const targetSegmentMiddle = winningIndex * segmentAngle + segmentAngle / 2;
-            const targetRotation = -targetSegmentMiddle;
+            // 指针在顶部(0度位置)，需要让目标扇形转到指针下方
+            // 目标扇形中间角度需要对准 0 度（顶部）
+            // 由于转盘顺时针旋转，需要计算反向角度
+            const targetAngle = winningIndex * segmentAngle + segmentAngle / 2;
             
+            // 多圈旋转 + 目标角度
             const spins = 5 + Math.floor(Math.random() * 3);
-            const finalRotation = currentRotation + spins * 360 + (targetRotation - (currentRotation % 360));
+            const finalRotation = currentRotation + spins * 360 + (360 - targetAngle);
             
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             currentRotation = finalRotation;
@@ -230,8 +306,13 @@
             setTimeout(() => {
                 isSpinning = false;
                 spinBtn.disabled = false;
+                centerBtn.disabled = false;
                 resultText.textContent = prizes[winningIndex].name;
                 result.classList.add('show');
+                
+                if (prizes[winningIndex].name !== '谢谢参与' && prizes[winningIndex].name !== '再来一次') {
+                    createConfetti();
+                }
             }, 4000);
         }
 
