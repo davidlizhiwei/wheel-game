@@ -49,15 +49,16 @@
             top: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-left: 60px;
         }
         .wheel-segment span {
-            transform: rotate(22.5deg);
             color: white;
             font-weight: bold;
-            font-size: 14px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            margin-left: 30px;
+            font-size: 16px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+            white-space: nowrap;
+            transform-origin: center;
         }
         .pointer {
             position: absolute;
@@ -148,6 +149,10 @@
             h1 {
                 font-size: 1.8rem;
             }
+            .wheel-segment span {
+                font-size: 13px;
+                padding-left: 40px;
+            }
         }
     </style>
 </head>
@@ -186,14 +191,18 @@
         // 创建转盘扇形
         function createWheel() {
             const segmentAngle = 360 / prizes.length;
+            
             prizes.forEach((prize, index) => {
                 const segment = document.createElement('div');
                 segment.className = 'wheel-segment';
                 segment.style.background = prize.color;
-                segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(${90 - segmentAngle}deg)`;
+                
+                const rotation = index * segmentAngle;
+                segment.style.transform = `rotate(${rotation}deg) skewY(${90 - segmentAngle}deg)`;
                 
                 const text = document.createElement('span');
                 text.textContent = prize.name;
+                text.style.transform = `skewY(${segmentAngle - 90}deg) rotate(${segmentAngle / 2}deg)`;
                 segment.appendChild(text);
                 wheel.appendChild(segment);
             });
@@ -205,16 +214,15 @@
             spinBtn.disabled = true;
             result.classList.remove('show');
 
-            // 随机选择奖品
             const winningIndex = Math.floor(Math.random() * prizes.length);
             const segmentAngle = 360 / prizes.length;
             
-            // 计算目标角度（指针指向扇形中间）
-            const targetAngle = 360 - (winningIndex * segmentAngle + segmentAngle / 2);
+            // 修正：让目标扇形中间对准顶部指针
+            const targetSegmentMiddle = winningIndex * segmentAngle + segmentAngle / 2;
+            const targetRotation = -targetSegmentMiddle;
             
-            // 添加多圈旋转 + 目标角度
-            const spins = 5 + Math.floor(Math.random() * 3); // 5-7圈
-            const finalRotation = currentRotation + spins * 360 + targetAngle - (currentRotation % 360);
+            const spins = 5 + Math.floor(Math.random() * 3);
+            const finalRotation = currentRotation + spins * 360 + (targetRotation - (currentRotation % 360));
             
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             currentRotation = finalRotation;
